@@ -17,6 +17,12 @@ create table if not exists public.perfis (
   criado_em  timestamptz not null default now()
 );
 
+-- ---------- E-mails que entram sempre como Administrador ----------
+create table if not exists public.admins_previstos (
+  email text primary key check (email = lower(email))
+);
+alter table public.admins_previstos enable row level security;  -- sem regras: ninguém lê pelo site
+
 -- ---------- Parâmetros de alerta (uma linha só) ----------
 create table if not exists public.parametros (
   id             int primary key default 1 check (id = 1),
@@ -154,12 +160,14 @@ $$;
 -- =====================================================================
 
 -- Novo login criado no Supabase => cria o perfil.
--- O primeiro usuário vira Administrador; os demais entram bloqueados até o admin liberar.
+-- O primeiro usuário, ou um e-mail da lista admins_previstos, vira Administrador; os demais entram bloqueados até o admin liberar.
 create or replace function public.ao_criar_usuario() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare tem_admin boolean;
 begin
-  select exists (select 1 from public.perfis where ativo and acessos ->> 'config' = 'editar') into tem_admin;
+  select exists (select 1 from public.perfis where ativo and acessos ->> 'config' = 'editar')
+     and not exists (select 1 from public.admins_previstos a where a.email = lower(new.email))
+    into tem_admin;
   insert into public.perfis (id, email, nome, perfil, ativo, acessos)
   values (
     new.id, new.email,
@@ -325,6 +333,7 @@ drop policy if exists auditoria_ler on public.auditoria;
 create policy auditoria_ler on public.auditoria for select to authenticated using (public.sou_admin());
 
 -- Permissões de tabela (o RLS acima é quem filtra de fato). Visitantes sem login não acessam nada.
+revoke all on public.admins_previstos from anon, authenticated;
 revoke all on public.perfis, public.parametros, public.contratos, public.contrato_historico, public.medicoes, public.auditoria from anon;
 grant select, update, delete on public.perfis to authenticated;
 grant select, update on public.parametros to authenticated;
