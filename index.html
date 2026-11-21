@@ -285,6 +285,31 @@ textarea.i { min-height: 64px; resize: vertical; }
   .chart.skel { animation: shimmer 1.4s linear infinite; }
   @keyframes shimmer { to { background-position: -200% 0; } }
 }
+/* Guia lateral de lançamento (FR e pedido) */
+.drawer { position: fixed; inset: 0; z-index: 40; }
+.drawer-bg { position: absolute; inset: 0; background: rgba(24, 24, 27, .28); }
+.drawer-panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(480px, 100vw); background: var(--surface); border-left: 1px solid var(--line); box-shadow: -24px 0 48px -24px rgba(24,24,27,.28); display: grid; grid-template-rows: auto auto 1fr; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.drawer-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 18px 20px 12px; border-bottom: 1px solid var(--line-2); }
+.drawer-head h2 { font-size: 18px; }
+.drawer-tabs { margin: 12px 20px 0; }
+.drawer-body { overflow-y: auto; padding: 14px 20px 28px; display: grid; gap: 14px; align-content: start; }
+.drawer-body .form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.drawer-body .f.full { grid-column: 1 / -1; }
+.drawer-body details summary { cursor: pointer; font-size: 12.5px; color: var(--muted); }
+.drawer-body .acts { display: flex; gap: 8px; flex-wrap: wrap; position: sticky; bottom: -28px; background: var(--surface); padding: 10px 0 4px; }
+.frrow { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: var(--r); }
+.frrow .top { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; }
+.frrow .top b { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.frrow .meta { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.frrow .go { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.sessao { display: grid; gap: 4px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line-2); padding-top: 10px; }
+.nav button.navbtn { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--r); color: var(--brand-ink); font-weight: 600; background: var(--brand-tint); margin-top: 6px; }
+.nav button.navbtn:hover { background: var(--brand-tint-2); } .nav button.navbtn:focus-visible { outline: 2px solid var(--brand); }
+.cred { background: var(--brand-tint); border: 1px solid var(--brand-tint-2); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; font-size: 13px; }
+.cred .mono { font-size: 13px; }
+.aviso-senha { background: var(--yellow-tint); border: 1px solid #F3DF9E; color: var(--yellow-ink); border-radius: var(--r); padding: 12px 14px; font-size: 13px; }
+@media (max-width: 900px) { .nav button.navbtn { margin-top: 0; flex: none; } }
+@media (prefers-reduced-motion: no-preference) { .drawer:not([hidden]) .drawer-panel { animation: entra .35s var(--ease) both; } @keyframes entra { from { transform: translateX(24px); opacity: .4; } to { transform: none; opacity: 1; } } }
 @media print { .side, .topline { position: static; } .nav, .toolbar, .actions, .pager, .me { display: none !important; } .shell { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -315,17 +340,17 @@ textarea.i { min-height: 64px; resize: vertical; }
       <div class="f"><label for="lg-pass">Senha</label><input class="i" id="lg-pass" type="password" autocomplete="current-password" required></div>
       <div class="err" id="lg-err" role="alert"></div>
       <button class="btn pri" type="submit" id="lg-btn">Entrar</button>
-      <p class="cap muted">Primeiro acesso? <button class="link" type="button" id="b-ir-cadastro">Criar conta</button></p>
+      <p class="cap muted">Recebeu uma senha provisória? Entre com ela: o sistema pede para criar a sua senha. Sem acesso? <button class="link" type="button" id="b-ir-cadastro">Solicitar acesso</button></p>
     </form>
     <form class="login-card" id="f-cadastro" hidden novalidate>
-      <div><h1>Criar conta</h1><p class="cap muted">Depois de criada, a conta aguarda o administrador liberar o acesso.</p></div>
+      <div><h1>Solicitar acesso</h1><p class="cap muted">Crie seu login. O acesso fica bloqueado até o administrador liberar.</p></div>
       <div class="f"><label for="cd-nome">Nome</label><input class="i" id="cd-nome" autocomplete="name"></div>
       <div class="f"><label for="cd-email">E-mail da empresa</label><input class="i" id="cd-email" type="email" autocomplete="email"></div>
       <div class="f"><label for="cd-pass">Senha (mínimo 8 caracteres)</label><input class="i" id="cd-pass" type="password" autocomplete="new-password"></div>
       <div class="err" id="cd-err" role="alert"></div>
-      <button class="btn pri" type="submit" id="cd-btn">Criar conta</button>
+      <button class="btn pri" type="submit" id="cd-btn">Solicitar acesso</button>
       <p class="cap muted"><button class="link" type="button" id="b-ir-login">Já tenho conta</button></p>
-      <p class="hint">O primeiro cadastro do sistema vira administrador automaticamente.</p>
+      <p class="hint">Se o administrador já cadastrou você, não precisa disto: entre com a senha provisória que ele enviou.</p>
     </form>
     <div class="login-card" id="v-pendente" hidden>
       <div><h1>Aguardando liberação</h1><p class="cap muted" id="pd-txt">Sua conta foi criada. Um administrador precisa escolher seu perfil e liberar o acesso.</p></div>
@@ -347,10 +372,18 @@ textarea.i { min-height: 64px; resize: vertical; }
   <div class="content">
     <header class="topline"><div class="in">
       <div><div class="crumb">Gestão de Contratos</div><h1 id="pg-title">Início</h1></div>
-      <div class="toolbar"><span class="status"><span class="pulse" aria-hidden="true"></span>Mês fechado <b id="hdr-mes">—</b><span class="muted" id="hdr-sync">· online</span></span><button class="btn sm" type="button" id="b-atualizar">Atualizar dados</button></div>
+      <div class="toolbar"><span class="status"><span class="pulse" aria-hidden="true"></span>Mês fechado <b id="hdr-mes">—</b><span class="muted" id="hdr-sync">· online</span></span><button class="btn sm" type="button" id="b-atualizar">Atualizar dados</button><button class="btn sm pri" type="button" id="b-lancar" hidden>Lançar FR</button></div>
     </div></header>
     <main id="main"></main>
   </div>
+</div>
+<div class="drawer" id="drawer" hidden>
+  <div class="drawer-bg" data-fechar></div>
+  <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="dw-title">
+    <header class="drawer-head"><div><div class="crumb">Equipe de medição</div><h2 id="dw-title">Lançar FR e pedido</h2></div><button class="iconbtn" type="button" data-fechar aria-label="Fechar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <div class="seg drawer-tabs" role="group" aria-label="Tipo de lançamento"><button type="button" data-aba="novo">Novo lançamento</button><button type="button" data-aba="fr">Informar FR</button></div>
+    <div class="drawer-body" id="dw-body"></div>
+  </aside>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
 
@@ -673,7 +706,7 @@ function tabela(cols, rows, estado, chave, vazio) {
   return wrap;
 }
 let STRIP = null;
-const UI = { ctFiltro: 'todos', ctBusca: '', medBusca: '', rel: 'mensal', proj: '', cc: '', cfg: 'usuarios', editCt: null, editLanc: null, editUser: null };
+const UI = { credencial: null, ctFiltro: 'todos', ctBusca: '', medBusca: '', rel: 'mensal', proj: '', cc: '', cfg: 'usuarios', editCt: null, editLanc: null, editUser: null };
 
 /* ===================== Ícones (traço 1,5) ===================== */
 const ICONES = {
@@ -683,7 +716,8 @@ const ICONES = {
   alertas: 'M12 3a5 5 0 0 1 5 5v4l2 3H5l2-3V8a5 5 0 0 1 5-5zM10 19a2 2 0 0 0 4 0',
   relatorios: 'M4 20h16M7 16v-4M12 16V7M17 16v-7',
   config: 'M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4',
-  seta: 'M9 6l6 6-6 6'
+  seta: 'M9 6l6 6-6 6',
+  lancar: 'M12 5v14M5 12h14'
 };
 function ico(nome) { const NS = 'http://www.w3.org/2000/svg'; const s = document.createElementNS(NS, 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'ic'); s.setAttribute('fill', 'none'); s.setAttribute('stroke', 'currentColor'); s.setAttribute('stroke-width', '1.5'); s.setAttribute('stroke-linecap', 'round'); s.setAttribute('stroke-linejoin', 'round'); s.setAttribute('aria-hidden', 'true'); const p = document.createElementNS(NS, 'path'); p.setAttribute('d', ICONES[nome]); s.append(p); return s; }
 const rise = (el, i) => { el.classList.add('rise'); el.style.setProperty('--i', i); return el; };
@@ -710,7 +744,136 @@ function renderTopo() {
   const item = ([m, n]) => h('a', { href: '#' + m, 'aria-current': PAGINA === m ? 'page' : null }, ico(m), n, m === 'alertas' && nAlert ? h('span', { class: 'badge', title: nAlert + ' contratos vencidos ou no farol vermelho' }, String(nAlert)) : null);
   const vis = MODULOS.filter(([m]) => pode(m));
   const op = vis.filter(([m]) => ['inicio', 'medicao', 'contratos'].includes(m)), an = vis.filter(([m]) => ['alertas', 'relatorios'].includes(m)), ad = vis.filter(([m]) => m === 'config');
-  $('#nav').replaceChildren(h('div', { class: 'grp' }, 'Operação'), ...op.map(item), an.length ? h('div', { class: 'grp' }, 'Análise') : null, ...an.map(item), ad.length ? h('div', { class: 'grp' }, 'Administração') : null, ...ad.map(item));
+  const btnL = edita('medicao') ? h('button', { class: 'navbtn', type: 'button', onclick: () => abrirLancador() }, ico('lancar'), 'Lançar FR') : null;
+  $('#b-lancar').hidden = !edita('medicao') || !!(usuarioAtual() && usuarioAtual().trocar_senha);
+  $('#nav').replaceChildren(...[h('div', { class: 'grp' }, 'Operação'), ...op.map(item), btnL, an.length ? h('div', { class: 'grp' }, 'Análise') : null, ...an.map(item), ad.length ? h('div', { class: 'grp' }, 'Administração') : null, ...ad.map(item)].filter(Boolean));
+}
+
+/* ===================== Guia lateral: lançar FR e pedido ===================== */
+const LC = { aba: 'novo', busca: '', sessao: [], fixo: {} };
+function abrirLancador(aba) {
+  if (!edita('medicao')) return;
+  if (aba) LC.aba = aba;
+  $('#drawer').hidden = false; document.documentElement.style.overflow = 'hidden';
+  desenharLancador();
+}
+function fecharLancador() { $('#drawer').hidden = true; document.documentElement.style.overflow = ''; }
+$$('#drawer [data-fechar]').forEach((b) => b.addEventListener('click', fecharLancador));
+$$('#drawer [data-aba]').forEach((b) => b.addEventListener('click', () => { LC.aba = b.dataset.aba; desenharLancador(); }));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#drawer').hidden) fecharLancador(); });
+$('#b-lancar').addEventListener('click', () => abrirLancador());
+function desenharLancador() {
+  $$('#drawer [data-aba]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.aba === LC.aba)));
+  const body = $('#dw-body'); body.replaceChildren();
+  if (LC.aba === 'novo') lancNovo(body); else lancFR(body);
+}
+const fimDoMes = (ym) => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10); };
+function lancNovo(body) {
+  const cts = D.todos;
+  const I = (t, val, extra) => h('input', { class: 'i', type: t || 'text', value: val == null ? '' : val, ...(extra || {}) });
+  const mesPadrao = LC.fixo.mes || hojeISO().slice(0, 7);
+  const f = {
+    contrato: I('text', LC.fixo.contrato, { list: 'dl-ct-dw', inputmode: 'numeric', placeholder: '46000…', autocomplete: 'off' }),
+    mes: I('month', mesPadrao), pedido: I('text', '', { inputmode: 'numeric', maxlength: '10', placeholder: '4500…' }), item: I('text', '10', { inputmode: 'numeric', maxlength: '5' }),
+    fr: I('text', '', { inputmode: 'numeric', placeholder: '1000…' }), status_fr: sel(['Pendente', 'Aprovada', 'Cancelada'], 'Pendente'),
+    valor: I('number', '', { step: '0.01', min: '0', placeholder: '0,00' }), nf: I('text', ''), status_processo: sel(['Pendente', 'Concluído'], 'Pendente'),
+    projeto: I('text', LC.fixo.projeto, { list: 'dl-proj-dw', placeholder: 'código do projeto' }), cc: I('text', LC.fixo.cc, { inputmode: 'numeric', placeholder: 'só números' }),
+    tipo_projeto: sel(TIPOS_PROJ, LC.fixo.tipo_projeto || 'Opex'), ini: I('date', ''), fim: I('date', ''), obs: I('text', '')
+  };
+  const info = h('div', { class: 'fmsg' }), msg = h('div', { class: 'fmsg', role: 'status' });
+  const preencher = () => {
+    const c = cts.find((x) => x.contrato === f.contrato.value.trim()), a = c && D.ct.find((x) => x.contrato === c.contrato);
+    if (c) { info.className = 'fmsg ' + (a && a.cor !== 'verde' ? 'w' : 'ok'); info.textContent = c.fornecedor + (a ? ' · fim ' + dataBR(a.fim) + ' · ' + a.farol + ' · saldo ' + brl(a.saldo) : ' · contrato ' + String(c.status).toLowerCase()); }
+    else { info.className = 'fmsg' + (f.contrato.value ? ' e' : ''); info.textContent = f.contrato.value ? 'Contrato não encontrado no cadastro.' : ''; }
+  };
+  f.contrato.addEventListener('input', preencher); f.contrato.addEventListener('change', preencher); preencher();
+  f.fr.addEventListener('change', () => { if (f.fr.value.trim() && f.status_fr.value === 'Pendente') f.status_fr.value = 'Aprovada'; });
+  const form = h('form', { novalidate: true },
+    h('datalist', { id: 'dl-ct-dw' }, cts.filter((c) => c.status !== 'Encerrado' && c.status !== 'Cancelado').map((c) => h('option', { value: c.contrato }, c.fornecedor + ' — ' + c.servico))),
+    h('datalist', { id: 'dl-proj-dw' }, [...new Set(D.med.map((r) => r.projeto))].sort().map((x) => h('option', { value: x }))),
+    h('div', { class: 'form' },
+      campo('dw-ct', 'Contrato', f.contrato, 'full', true), h('div', { class: 'f full' }, info),
+      campo('dw-mes', 'Mês de referência', f.mes, '', true), campo('dw-val', 'Valor medido (R$)', f.valor, '', true),
+      campo('dw-ped', 'Nº do pedido', f.pedido, '', true), campo('dw-item', 'Item', f.item, '', true),
+      campo('dw-fr', 'Nº da FR', f.fr), campo('dw-sfr', 'Status da FR', f.status_fr),
+      campo('dw-nf', 'NF', f.nf), campo('dw-sp', 'Status do processo', f.status_processo)),
+    h('details', null, h('summary', null, 'Mais campos: projeto, centro de custo, período'),
+      h('div', { class: 'form', style: 'margin-top:10px' }, campo('dw-tp', 'Tipo de projeto', f.tipo_projeto), campo('dw-proj', 'Projeto / elemento', f.projeto), campo('dw-cc', 'Centro de custo', f.cc),
+        campo('dw-ini', 'Início da medição', f.ini), campo('dw-fim', 'Fim da medição', f.fim), campo('dw-obs', 'Observação', f.obs, 'full'),
+        h('p', { class: 'cap muted f full' }, 'Sem período informado, o sistema usa o mês de referência inteiro.'))),
+    msg,
+    h('div', { class: 'acts' }, h('button', { class: 'btn pri', type: 'submit', 'data-modo': 'outro' }, 'Salvar e lançar outro'), h('button', { class: 'btn', type: 'submit', 'data-modo': 'fechar' }, 'Salvar e fechar')));
+  form.addEventListener('input', () => { delete form.dataset.aviso; });
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const modo = (ev.submitter && ev.submitter.dataset.modo) || 'outro';
+    $$('.i', form).forEach((e) => e.removeAttribute('aria-invalid'));
+    const v = {}; for (const [k, e] of Object.entries(f)) v[k] = e.value.trim();
+    const erros = [], bad = (k, m) => { f[k].setAttribute('aria-invalid', 'true'); erros.push(m); };
+    const c = cts.find((x) => x.contrato === v.contrato);
+    if (!c) bad('contrato', 'Escolha um contrato do cadastro.');
+    if (!/^\d{4}-\d{2}$/.test(v.mes)) bad('mes', 'Informe o mês de referência.');
+    if (!/^\d{10}$/.test(v.pedido)) bad('pedido', 'Pedido deve ter 10 dígitos.');
+    if (!/^\d{1,5}$/.test(v.item)) bad('item', 'Item inválido.');
+    if (v.fr && !/^\d{10}( ?\/ ?\d{10})*$/.test(v.fr)) bad('fr', 'FR deve ter 10 dígitos.');
+    if (v.status_fr === 'Aprovada' && !v.fr) bad('fr', 'FR aprovada precisa do número.');
+    const valor = Number(v.valor); if (!(valor > 0)) bad('valor', 'Informe o valor.');
+    if (v.cc && !/^\d{4,10}$/.test(v.cc)) bad('cc', 'Centro de custo só com números.');
+    const ini = v.ini || (v.mes ? v.mes + '-01' : ''), fim = v.fim || (v.mes ? fimDoMes(v.mes) : '');
+    if (ini && fim && fim < ini) bad('fim', 'Fim antes do início.');
+    if (erros.length) { msg.className = 'fmsg e'; msg.textContent = erros.join(' '); return; }
+    const avisos = [], a = D.ct.find((x) => x.contrato === c.contrato);
+    if (fim > c.fim) avisos.push('Medição depois do fim do contrato (' + dataBR(c.fim) + ').');
+    if (a && valor > a.saldo) avisos.push('Valor maior que o saldo (' + brl(a.saldo) + ').');
+    if (v.fr && DB.medicoes.some((l) => l.fr === v.fr)) avisos.push('Esta FR já foi lançada.');
+    if (DB.medicoes.some((l) => l.pedido === v.pedido && String(l.item) === v.item && l.mes === v.mes + '-01' && Number(l.valor) === r2(valor))) avisos.push('Já existe lançamento igual (pedido, item, mês e valor).');
+    if (avisos.length && !form.dataset.aviso) { form.dataset.aviso = '1'; msg.className = 'fmsg w'; msg.textContent = avisos.join(' ') + ' Clique em salvar de novo para confirmar.'; return; }
+    delete form.dataset.aviso;
+    const reg = { contrato: c.contrato, fornecedor: c.fornecedor, localidade: c.localidade || null, status_contrato: c.status, mes: v.mes + '-01', ini, fim,
+      pedido: v.pedido, item: v.item, fr: v.fr || null, status_fr: v.status_fr, valor: r2(valor), nf: v.nf || null, status_processo: v.status_processo,
+      tipo_projeto: v.tipo_projeto, projeto: v.projeto || null, cc: v.cc || null, obs: v.obs || null, servico: c.servico, incidencia: 'Demanda' };
+    $$('button[type=submit]', form).forEach((b) => { b.disabled = true; }); msg.className = 'fmsg'; msg.textContent = 'Salvando…';
+    try {
+      const row = numMed(await q(SB.from('medicoes').insert(reg).select(COLS_MED).single()));
+      DB.medicoes.push(row); calcular(); if (ESTADO === 'app') render();
+      LC.sessao.unshift(row); LC.fixo = { contrato: c.contrato, mes: v.mes, projeto: v.projeto, cc: v.cc, tipo_projeto: v.tipo_projeto };
+      toast('Lançado: pedido ' + v.pedido + ' · ' + brl(reg.valor) + '.', 'ok');
+      if (modo === 'fechar') { fecharLancador(); return; }
+      desenharLancador(); setTimeout(() => { const pd = $('#dw-ped'); if (pd) pd.focus(); }, 30);
+    } catch (e2) { $$('button[type=submit]', form).forEach((b) => { b.disabled = false; }); msg.className = 'fmsg e'; msg.textContent = msgErro(e2); }
+  });
+  body.append(h('p', { class: 'cap muted' }, 'Depois de salvar, o contrato, o mês e o projeto ficam preenchidos para o próximo lançamento.'), form);
+  if (LC.sessao.length) body.append(h('div', { class: 'sessao' }, h('b', null, 'Lançados agora (' + LC.sessao.length + ')'), LC.sessao.slice(0, 8).map((r) => h('span', null, h('span', { class: 'mono' }, r.pedido + '/' + r.item), ' · ' + (r.fr ? 'FR ' + r.fr : 'sem FR') + ' · ' + brl(r.valor) + ' · ' + r.contrato))));
+  setTimeout(() => { (f.contrato.value ? f.pedido : f.contrato).focus(); }, 30);
+}
+function lancFR(body) {
+  const busca = h('input', { class: 'i', id: 'dw-busca', type: 'search', placeholder: 'Pedido, contrato ou fornecedor', value: LC.busca });
+  const lista = h('div', { style: 'display:grid;gap:10px' });
+  const desenhar = () => {
+    const qy = norm(LC.busca);
+    const rows = DB.medicoes.filter((m) => m.status_fr !== 'Cancelada' && (m.status_fr === 'Pendente' || !m.fr) && (!qy || norm([m.pedido, m.contrato, m.fornecedor, m.nf].join(' ')).includes(qy)))
+      .sort((a, b) => String(b.mes || '').localeCompare(String(a.mes || '')) || b.id - a.id);
+    lista.replaceChildren(h('p', { class: 'cap muted' }, rows.length ? (rows.length > 10 ? 'Mostrando 10 de ' + n0(rows.length) + ' com FR pendente. Busque pelo pedido para achar mais rápido.' : n0(rows.length) + ' lançamento(s) com FR pendente.') : 'Nenhum lançamento com FR pendente' + (qy ? ' para esta busca.' : '.')),
+      ...rows.slice(0, 10).map((m) => {
+        const inp = h('input', { class: 'i mono', inputmode: 'numeric', placeholder: 'Nº da FR (10 dígitos)', value: m.fr || '', 'aria-label': 'FR do pedido ' + (m.pedido || '') });
+        const ok = h('button', { class: 'btn pri', type: 'button' }, 'Aprovar FR');
+        const msg = h('div', { class: 'fmsg' });
+        ok.addEventListener('click', async () => {
+          const fr = inp.value.trim();
+          if (!/^\d{10}( ?\/ ?\d{10})*$/.test(fr)) { inp.setAttribute('aria-invalid', 'true'); msg.className = 'fmsg e'; msg.textContent = 'FR deve ter 10 dígitos.'; return; }
+          ok.disabled = true;
+          try { const row = numMed(await q(SB.from('medicoes').update({ fr, status_fr: 'Aprovada' }).eq('id', m.id).select(COLS_MED).single())); Object.assign(m, row); calcular(); if (ESTADO === 'app') render(); toast('FR ' + fr + ' aprovada no pedido ' + (m.pedido || '') + '.', 'ok'); desenhar(); }
+          catch (e2) { ok.disabled = false; msg.className = 'fmsg e'; msg.textContent = msgErro(e2); }
+        });
+        inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); ok.click(); } });
+        return h('div', { class: 'frrow' }, h('div', { class: 'top' }, h('b', { title: m.fornecedor || '' }, (m.contrato || 'Sem contrato') + ' · ' + (m.fornecedor || '—')), h('span', { class: 'mono' }, brl(m.valor))),
+          h('div', { class: 'meta' }, (m.mes ? mesLbl(m.mes) : 'sem mês') + ' · pedido ' + (m.pedido || '—') + (m.item ? '/' + m.item : '') + (m.nf ? ' · NF ' + m.nf : '') + (m.origem === 'planilha' ? ' · planilha' : '')),
+          h('div', { class: 'go' }, inp, ok), msg);
+      }));
+  };
+  busca.addEventListener('input', () => { LC.busca = busca.value; desenhar(); });
+  body.append(h('div', { class: 'f' }, h('label', { for: 'dw-busca' }, 'Buscar lançamento'), busca), lista);
+  desenhar(); setTimeout(() => busca.focus(), 30);
 }
 
 /* ===================== Páginas ===================== */
@@ -1079,15 +1242,67 @@ PAGES.config = (main) => {
 };
 function cfgUsuarios(main) {
   const eu = usuarioAtual();
-  if (UI.editUser) { const u = DB.perfis.find((x) => x.id === UI.editUser); if (u) main.append(formUsuario(u)); }
+  if (UI.credencial) main.append(cartaoCredencial(UI.credencial));
+  if (UI.editUser === '__novo') main.append(formNovaPessoa());
+  else if (UI.editUser) { const u = DB.perfis.find((x) => x.id === UI.editUser); if (u) main.append(formUsuario(u)); }
   const resumo = (u) => MODULOS.map(([m, n]) => (u.acessos || {})[m] === 'editar' ? n + ' (editar)' : (u.acessos || {})[m] === 'ver' ? n : null).filter(Boolean).join(' · ') || 'Sem acesso';
   const lista = DB.perfis.slice().sort((a, b) => (a.perfil === 'Pendente' ? 0 : 1) - (b.perfil === 'Pendente' ? 0 : 1) || String(a.nome).localeCompare(String(b.nome)));
   const pend = lista.filter((u) => u.perfil === 'Pendente').length;
   main.append(
-    card('Como incluir um usuário', null, h('p', { class: 'cap muted' }, 'A pessoa abre o sistema e clica em Criar conta, com o e-mail da empresa. Ela aparece aqui como Pendente: clique em Liberar, escolha o perfil e salve. Para tirar o acesso, mude a situação para Bloqueado.')),
     card('Usuários' + (pend ? ' · ' + pend + ' aguardando liberação' : ''), null,
+      h('div', { class: 'toolbar' }, h('span', { class: 'cap muted grow' }, 'Cadastre a pessoa com uma senha provisória: o acesso já fica liberado e ela cria a própria senha no primeiro acesso. Para tirar o acesso, mude a situação para Bloqueado.'),
+        UI.editUser ? null : h('button', { class: 'btn pri', type: 'button', onclick: () => { UI.editUser = '__novo'; UI.credencial = null; render(); window.scrollTo(0, 0); } }, '+ Cadastrar pessoa')),
       tabela([{ t: 'Nome', v: (u) => u.nome || '—' }, { t: 'E-mail', v: (u) => u.email }, { t: 'Perfil', v: (u) => u.perfil === 'Pendente' ? chip('Pendente', 2) : u.perfil }, { t: 'Situação', v: (u) => chip(u.ativo ? 'Ativo' : 'Bloqueado', u.ativo ? 0 : 3) }, { t: 'Acessos', v: (u) => resumo(u) },
         { t: '', v: (u) => h('button', { class: 'btn sm' + (u.perfil === 'Pendente' ? ' pri' : ''), type: 'button', onclick: () => { UI.editUser = u.id; render(); window.scrollTo(0, 0); } }, u.perfil === 'Pendente' ? 'Liberar' : u.id === eu.id ? 'Meu acesso' : 'Editar') }], lista, UI, 'pgUser', 'Nenhum usuário cadastrado.')));
+}
+function gerarSenha() {
+  const A = 'ABCDEFGHJKMNPQRSTUVWXYZ', N = '23456789', R = new Uint32Array(8); crypto.getRandomValues(R);
+  const p = (i, s) => s[R[i] % s.length];
+  return 'Med-' + p(0, A) + p(1, N) + p(2, A) + p(3, N) + '-' + p(4, A) + p(5, N) + p(6, A) + p(7, N);
+}
+function cartaoCredencial(c) {
+  const site = location.protocol === 'https:' ? location.origin + location.pathname : 'endereço do site';
+  const texto = 'Acesso ao sistema de Medições e Contratos\nEndereço: ' + site + '\nE-mail: ' + c.email + '\nSenha provisória: ' + c.senha + '\nNo primeiro acesso o sistema pede para você criar a sua senha.';
+  const copiar = h('button', { class: 'btn sm', type: 'button' }, 'Copiar mensagem');
+  copiar.addEventListener('click', async () => { try { await navigator.clipboard.writeText(texto); copiar.textContent = 'Copiado'; } catch (e) { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); copiar.textContent = 'Selecionado: Ctrl+C'; } });
+  const pre = h('div', { class: 'mono', style: 'white-space:pre-wrap' }, texto);
+  return h('div', { class: 'card' }, h('div', { class: 'cardhead' }, h('h3', null, c.titulo), h('div', { class: 'toolbar' }, copiar, h('button', { class: 'btn sm', type: 'button', onclick: () => { UI.credencial = null; render(); } }, 'Fechar'))),
+    h('div', { class: 'cred' }, pre), h('p', { class: 'cap muted' }, 'Envie esta mensagem para a pessoa por um canal interno (Teams ou e-mail corporativo). A senha provisória não aparece de novo depois que você fechar este aviso.'));
+}
+function seletorAcessos(v) {
+  const niveis = {};
+  const perm = h('div', { class: 'perm' }, MODULOS.map(([m, n]) => { const s = sel(m === 'inicio' || m === 'alertas' || m === 'relatorios' ? [['nao', 'Sem acesso'], ['ver', 'Visualizar']] : [['nao', 'Sem acesso'], ['ver', 'Visualizar'], ['editar', 'Editar']], (v || {})[m] || 'nao'); niveis[m] = s; return campo('p-' + m, n, s); }));
+  return { perm, niveis, ler: () => { const a = {}; for (const [m] of MODULOS) a[m] = niveis[m].value; return a; }, aplicar: (p) => { for (const [m] of MODULOS) niveis[m].value = p[m]; } };
+}
+function formNovaPessoa() {
+  const nome = h('input', { class: 'i', autocomplete: 'off' }), email = h('input', { class: 'i', type: 'email', autocomplete: 'off', placeholder: 'nome@empresa.com.br' });
+  const senha = h('input', { class: 'i mono', value: gerarSenha(), autocomplete: 'off' });
+  const perfil = sel(Object.keys(PERFIS), 'Lançador');
+  const ac = seletorAcessos(PERFIS['Lançador']);
+  perfil.addEventListener('change', () => ac.aplicar(PERFIS[perfil.value]));
+  const msg = h('div', { class: 'fmsg', role: 'status' });
+  const form = h('form', { class: 'card', novalidate: true },
+    h('div', { class: 'cardhead' }, h('h3', null, 'Cadastrar pessoa')),
+    h('div', { class: 'form' }, campo('np-nome', 'Nome', nome, 'w2', true), campo('np-email', 'E-mail (login)', email, 'w2', true), campo('np-perfil', 'Perfil', perfil),
+      h('div', { class: 'f' }, h('label', { for: 'np-senha' }, 'Senha provisória', h('span', { class: 'req' }, ' *')), h('div', { class: 'toolbar' }, (senha.id = 'np-senha', senha), h('button', { class: 'btn sm', type: 'button', onclick: () => { senha.value = gerarSenha(); } }, 'Gerar outra')))),
+    h('div', null, h('div', { class: 'cap muted', style: 'margin-bottom:6px' }, 'Acesso por página (o perfil preenche um padrão; ajuste se precisar):'), ac.perm),
+    msg, h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => { UI.editUser = null; render(); } }, 'Cancelar'), h('button', { class: 'btn pri', type: 'submit' }, 'Cadastrar e liberar acesso')));
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const em = email.value.trim().toLowerCase(), er = [];
+    if (!nome.value.trim()) er.push('Informe o nome.');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) er.push('Informe um e-mail válido.');
+    if (senha.value.length < 8) er.push('A senha provisória precisa de pelo menos 8 caracteres.');
+    if (DB.perfis.some((x) => x.email === em)) er.push('Este e-mail já tem acesso cadastrado.');
+    if (er.length) { msg.className = 'fmsg e'; msg.textContent = er.join(' '); return; }
+    const btn = $('button[type=submit]', form); btn.disabled = true; msg.className = 'fmsg'; msg.textContent = 'Cadastrando…';
+    try {
+      await q(SB.rpc('admin_criar_usuario', { p_email: em, p_nome: nome.value.trim(), p_senha: senha.value, p_perfil: perfil.value, p_acessos: ac.ler() }));
+      DB.perfis = await q(SB.from('perfis').select('*').order('criado_em', { ascending: true }));
+      UI.editUser = null; UI.credencial = { titulo: 'Acesso criado para ' + nome.value.trim(), email: em, senha: senha.value }; toast('Acesso criado para ' + em + '.', 'ok'); render(); window.scrollTo(0, 0);
+    } catch (e2) { btn.disabled = false; msg.className = 'fmsg e'; msg.textContent = msgErro(e2); }
+  });
+  return form;
 }
 function formUsuario(u) {
   const eu = usuarioAtual();
@@ -1103,7 +1318,11 @@ function formUsuario(u) {
     h('div', { class: 'cardhead' }, h('h3', null, (pend ? 'Liberar ' : 'Editar ') + (u.nome || u.email))),
     h('div', { class: 'form' }, campo('u-nome', 'Nome', nome, 'w2', true), campo('u-email', 'E-mail (login)', email, 'w2'), campo('u-perfil', 'Perfil', perfil), campo('u-ativo', 'Situação', ativo)),
     h('div', null, h('div', { class: 'cap muted', style: 'margin-bottom:6px' }, 'Acesso por página (o perfil preenche um padrão; ajuste se precisar):'), perm),
-    h('p', { class: 'cap muted' }, 'A senha é de cada pessoa: ela troca em Minha conta. Se esquecer, o administrador envia uma redefinição pelo painel do Supabase (Authentication › Users).'),
+    pend ? null : h('div', { class: 'toolbar' }, h('span', { class: 'cap muted grow' }, 'Esqueceu a senha? Gere uma senha provisória: a pessoa cria uma nova no próximo acesso.'), h('button', { class: 'btn sm', type: 'button', onclick: async (ev) => {
+      const b = ev.currentTarget; if (!b.dataset.conf) { b.dataset.conf = '1'; b.textContent = 'Confirmar nova senha provisória'; return; }
+      const s = gerarSenha(); b.disabled = true;
+      try { await q(SB.rpc('admin_redefinir_senha', { p_id: u.id, p_senha: s })); UI.editUser = null; UI.credencial = { titulo: 'Nova senha provisória para ' + (u.nome || u.email), email: u.email, senha: s }; toast('Senha redefinida.', 'ok'); render(); window.scrollTo(0, 0); }
+      catch (e2) { b.disabled = false; toast(msgErro(e2), 'e'); } } }, 'Redefinir senha')),
     msg, h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => { UI.editUser = null; render(); } }, 'Cancelar'), h('button', { class: 'btn pri', type: 'submit' }, pend ? 'Liberar acesso' : 'Salvar')));
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -1174,10 +1393,12 @@ PAGES.conta = (main) => {
     ev.preventDefault();
     if (s1.value.length < 8) { msg.className = 'fmsg e'; msg.textContent = 'Use pelo menos 8 caracteres.'; return; }
     if (s1.value !== s2.value) { msg.className = 'fmsg e'; msg.textContent = 'As senhas não conferem.'; return; }
-    try { await q(SB.auth.updateUser({ password: s1.value })); s1.value = s2.value = ''; msg.className = 'fmsg ok'; msg.textContent = 'Senha alterada.'; }
+    try { await q(SB.auth.updateUser({ password: s1.value })); s1.value = s2.value = ''; msg.className = 'fmsg ok'; msg.textContent = 'Senha alterada.';
+      if (u.trocar_senha) { try { await q(SB.rpc('senha_trocada')); } catch (e3) {} u.trocar_senha = false; toast('Senha criada. Bem-vindo!', 'ok'); location.hash = 'inicio'; render(); } }
     catch (e2) { msg.className = 'fmsg e'; msg.textContent = msgErro(e2); }
   });
   const resumo = MODULOS.map(([m, n]) => u.acessos[m] === 'editar' ? n + ' (editar)' : u.acessos[m] === 'ver' ? n : null).filter(Boolean).join(' · ');
+  if (u.trocar_senha) main.append(h('div', { class: 'aviso-senha' }, h('b', null, 'Crie a sua senha para continuar. '), 'Você entrou com uma senha provisória. Escolha uma senha nova (mínimo 8 caracteres) para liberar o sistema.'));
   main.append(h('div', { class: 'grid2' },
     card('Seus dados', null, h('div', { class: 'minis', style: 'grid-template-columns:1fr' }, h('div', null, h('span', null, 'Nome'), h('b', null, u.nome || '—')), h('div', null, h('span', null, 'E-mail'), h('b', null, u.email)), h('div', null, h('span', null, 'Perfil'), h('b', null, u.perfil)), h('div', null, h('span', null, 'Acessos'), h('b', { style: 'white-space:normal;font-size:13px' }, resumo)))),
     form));
@@ -1197,12 +1418,14 @@ function render() {
   $('#v-login').hidden = true; $('#v-app').hidden = false;
   let p = location.hash.slice(1);
   if (!PAGES[p] || !pode(p)) p = MODULOS.map((m) => m[0]).find(pode) || 'conta';
+  if (PERFIL.trocar_senha) p = 'conta';
   PAGINA = p;
   renderTopo();
+  if (PERFIL.trocar_senha) { $('#nav').replaceChildren(); $('#strip') && $('#strip').remove(); }
   if (p === 'conta') $('#pg-title').textContent = 'Minha conta';
   $('#hdr-sync').textContent = DB.carregado_em ? '· atualizado ' + DB.carregado_em.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '· online';
   const main = $('#main'); main.replaceChildren();
-  if (p !== 'inicio' && p !== 'conta' && STRIP) main.append(STRIP);
+  if (p !== 'inicio' && p !== 'conta' && STRIP && !PERFIL.trocar_senha) main.append(STRIP);
   PAGES[p](main);
   [...main.children].forEach((c, i) => { if (i < 6) rise(c, i); });
   main.append(h('p', { class: 'foot' }, 'Dados do banco Supabase, compartilhados por todos os usuários. Histórico importado da planilha até 19/11/2026. Prazos contados a partir de hoje.'));
@@ -1268,7 +1491,7 @@ $('#f-cadastro').addEventListener('submit', async (ev) => {
   finally { $('#cd-btn').disabled = false; }
 });
 async function sair() { try { await SB.auth.signOut(); } catch (e) {} PERFIL = null; DB = { params: { ...PARAMS_PADRAO }, contratos: [], medicoes: [], historico: [], perfis: [], log: [], carregado_em: null }; ESTADO = 'login'; render(); }
-$('#b-sair').addEventListener('click', sair);
+$('#b-sair').addEventListener('click', () => { fecharLancador(); sair(); });
 $('#b-pd-sair').addEventListener('click', sair);
 $('#b-pd-verificar').addEventListener('click', () => entrarComSessao(true));
 
