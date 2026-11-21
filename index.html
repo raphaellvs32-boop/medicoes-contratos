@@ -396,7 +396,7 @@ function toast(msg, kind) { const t = $('#toast'); t.textContent = msg; t.classN
 
 /* ===================== Conexão com o Supabase ===================== */
 /* A TI pode fixar a conexão aqui antes de distribuir o arquivo. Se ficar vazio, o sistema pergunta na primeira abertura. */
-const SUPABASE_URL = '';
+const SUPABASE_URL = 'https://pmhpgexsrdyukpzcpudp.supabase.co';
 const SUPABASE_ANON_KEY = '';
 const CFG_KEY = 'gmc_supabase';
 function lerCfg() {
@@ -1190,6 +1190,7 @@ function render() {
   if (ESTADO !== 'app') {
     $('#v-app').hidden = true; $('#v-login').hidden = false;
     for (const [k, s] of Object.entries(TELAS)) if (k !== 'iniciando') $(s).hidden = !(TELAS[ESTADO] === s);
+    if (ESTADO === 'conectar' && SUPABASE_URL) { const u = $('#cx-url'); u.value = SUPABASE_URL; u.readOnly = true; }
     if (ESTADO === 'pendente' && PERFIL) $('#pd-txt').textContent = 'A conta ' + PERFIL.email + ' foi criada. Um administrador precisa escolher seu perfil e liberar o acesso. Depois clique em Verificar de novo.';
     return;
   }
@@ -1233,7 +1234,7 @@ window.addEventListener('focus', () => { if (ESTADO === 'app' && Date.now() - ul
 
 $('#f-conectar').addEventListener('submit', async (ev) => {
   ev.preventDefault();
-  const url = $('#cx-url').value.trim().replace(/\/+$/, ''), key = $('#cx-key').value.trim();
+  const url = (SUPABASE_URL || $('#cx-url').value).trim().replace(/\/+$/, ''), key = $('#cx-key').value.trim();
   if (!/^https:\/\/[a-z0-9-]+\.supabase\.(co|in)$/i.test(url)) { $('#cx-err').textContent = 'A URL deve ser parecida com https://xxxx.supabase.co'; return; }
   if (!/^eyJ[\w-]+\.[\w-]+\.[\w-]+$/.test(key) && !/^sb_publishable_/.test(key)) { $('#cx-err').textContent = 'A chave não parece válida. Copie a chave "anon public" inteira.'; return; }
   try { const payload = key.startsWith('eyJ') ? JSON.parse(atob(key.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))) : {}; if (payload.role === 'service_role') { $('#cx-err').textContent = 'Esta é a chave service_role (secreta). Use a chave anon public.'; return; } } catch (e) {}
