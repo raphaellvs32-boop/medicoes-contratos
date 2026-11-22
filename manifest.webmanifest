@@ -14,7 +14,7 @@
     { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Lançar medição", "url": "./#medicao", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Pedido e FR", "url": "./#medicao", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
     { "name": "Alertas", "url": "./#alertas", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
   ]
 }

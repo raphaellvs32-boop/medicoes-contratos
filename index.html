@@ -372,7 +372,7 @@ textarea.i { min-height: 64px; resize: vertical; }
   <div class="content">
     <header class="topline"><div class="in">
       <div><div class="crumb">Gestão de Contratos</div><h1 id="pg-title">Início</h1></div>
-      <div class="toolbar"><span class="status"><span class="pulse" aria-hidden="true"></span>Mês fechado <b id="hdr-mes">—</b><span class="muted" id="hdr-sync">· online</span></span><button class="btn sm" type="button" id="b-atualizar">Atualizar dados</button><button class="btn sm pri" type="button" id="b-lancar" hidden>Lançar FR</button></div>
+      <div class="toolbar"><span class="status"><span class="pulse" aria-hidden="true"></span>Mês fechado <b id="hdr-mes">—</b><span class="muted" id="hdr-sync">· online</span></span><button class="btn sm" type="button" id="b-atualizar">Atualizar dados</button><button class="btn sm pri" type="button" id="b-lancar" hidden>Pedido e FR</button></div>
     </div></header>
     <main id="main"></main>
   </div>
@@ -380,7 +380,7 @@ textarea.i { min-height: 64px; resize: vertical; }
 <div class="drawer" id="drawer" hidden>
   <div class="drawer-bg" data-fechar></div>
   <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="dw-title">
-    <header class="drawer-head"><div><div class="crumb">Equipe de medição</div><h2 id="dw-title">Lançar FR e pedido</h2></div><button class="iconbtn" type="button" data-fechar aria-label="Fechar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <header class="drawer-head"><div><div class="crumb">Equipe de medição</div><h2 id="dw-title">Pedido e FR</h2></div><button class="iconbtn" type="button" data-fechar aria-label="Fechar"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
     <div class="seg drawer-tabs" role="group" aria-label="Tipo de lançamento"><button type="button" data-aba="novo">Novo lançamento</button><button type="button" data-aba="fr">Informar FR</button></div>
     <div class="drawer-body" id="dw-body"></div>
   </aside>
@@ -744,7 +744,7 @@ function renderTopo() {
   const item = ([m, n]) => h('a', { href: '#' + m, 'aria-current': PAGINA === m ? 'page' : null }, ico(m), n, m === 'alertas' && nAlert ? h('span', { class: 'badge', title: nAlert + ' contratos vencidos ou no farol vermelho' }, String(nAlert)) : null);
   const vis = MODULOS.filter(([m]) => pode(m));
   const op = vis.filter(([m]) => ['inicio', 'medicao', 'contratos'].includes(m)), an = vis.filter(([m]) => ['alertas', 'relatorios'].includes(m)), ad = vis.filter(([m]) => m === 'config');
-  const btnL = edita('medicao') ? h('button', { class: 'navbtn', type: 'button', onclick: () => abrirLancador() }, ico('lancar'), 'Lançar FR') : null;
+  const btnL = edita('medicao') ? h('button', { class: 'navbtn', type: 'button', onclick: () => abrirLancador() }, ico('lancar'), 'Pedido e FR') : null;
   $('#b-lancar').hidden = !edita('medicao') || !!(usuarioAtual() && usuarioAtual().trocar_senha);
   $('#nav').replaceChildren(...[h('div', { class: 'grp' }, 'Operação'), ...op.map(item), btnL, an.length ? h('div', { class: 'grp' }, 'Análise') : null, ...an.map(item), ad.length ? h('div', { class: 'grp' }, 'Administração') : null, ...ad.map(item)].filter(Boolean));
 }
