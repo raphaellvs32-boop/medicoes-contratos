@@ -270,7 +270,9 @@ textarea.i { min-height: 64px; resize: vertical; }
   .side .logo .nm { display: none; }
   .nav { display: flex; overflow-x: auto; scrollbar-width: none; gap: 2px; }
   .nav .grp { display: none; } .nav a { flex: none; padding: 8px 10px; } .nav a[aria-current="page"]::before { display: none; }
-  .me { display: none; }
+  .side { grid-template-columns: auto 1fr auto; }
+  .me { display: flex; border: 0; padding: 0; gap: 0; }
+  .me .av, .me .who { display: none; }
   .topline { position: static; } .topline .in, main#main { padding-left: 16px; padding-right: 16px; }
 }
 
@@ -285,6 +287,21 @@ textarea.i { min-height: 64px; resize: vertical; }
   .chart.skel { animation: shimmer 1.4s linear infinite; }
   @keyframes shimmer { to { background-position: -200% 0; } }
 }
+/* Acabou de acontecer */
+.c12 { grid-column: 1 / -1; }
+.feed { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 4px; scrollbar-width: thin; -webkit-mask-image: linear-gradient(90deg, #000 92%, transparent); mask-image: linear-gradient(90deg, #000 92%, transparent); }
+.ev { flex: none; width: 290px; scroll-snap-align: start; display: grid; gap: 4px; padding: 10px 12px; border-radius: var(--r); background: var(--sunken); border: 1px solid var(--line-2); }
+.ev .q { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev .q i { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--gray); }
+.ev[data-t="ok"] .q i { background: var(--brand); } .ev[data-t="novo"] .q i { background: var(--s2); } .ev[data-t="del"] .q i { background: var(--red); }
+.ev .o { font-size: 12.5px; color: var(--fg-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev .o b { font-weight: 600; color: var(--fg); }
+.ev.chegou { border-color: var(--brand); background: var(--brand-tint); }
+.aovivo { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--brand-ink); background: var(--brand-tint); padding: 3px 9px; border-radius: 999px; }
+.aovivo.off { color: var(--muted); background: var(--sunken); }
+.aovivo.off .pulse { background: var(--gray); } .aovivo.off .pulse::after { display: none; }
+@media (prefers-reduced-motion: no-preference) { .ev.chegou { animation: chega .6s var(--ease) both; } @keyframes chega { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } } }
+
 /* Guia lateral de lançamento (FR e pedido) */
 .drawer { position: fixed; inset: 0; z-index: 40; }
 .drawer-bg { position: absolute; inset: 0; background: rgba(24, 24, 27, .28); }
@@ -488,10 +505,9 @@ async function carregarTudo() {
   ]);
   DB.params = { ...PARAMS_PADRAO, ...(params || {}) };
   DB.contratos = contratos; DB.medicoes = medicoes.map(numMed); DB.historico = historico;
-  if (PERFIL && PERFIL.acessos.config === 'editar') {
-    DB.perfis = await q(SB.from('perfis').select('*').order('criado_em', { ascending: true }));
-    DB.log = await q(SB.from('auditoria').select('*').order('em', { ascending: false }).limit(200));
-  } else { DB.perfis = []; DB.log = []; }
+  DB.log = await q(SB.from('auditoria').select('*').order('em', { ascending: false }).limit(200));
+  if (PERFIL && PERFIL.acessos.config === 'editar') DB.perfis = await q(SB.from('perfis').select('*').order('criado_em', { ascending: true }));
+  else DB.perfis = [];
   DB.carregado_em = new Date();
 }
 
@@ -749,6 +765,65 @@ function renderTopo() {
   $('#nav').replaceChildren(...[h('div', { class: 'grp' }, 'Operação'), ...op.map(item), btnL, an.length ? h('div', { class: 'grp' }, 'Análise') : null, ...an.map(item), ad.length ? h('div', { class: 'grp' }, 'Administração') : null, ...ad.map(item)].filter(Boolean));
 }
 
+/* ===================== Acabou de acontecer + atualização ao vivo ===================== */
+let AOVIVO = false, CANAL = null, PEND_RENDER = false, tAgenda = null;
+const EVENTOS_FEED = ['Lançou medição', 'Alterou medição', 'Aprovou FR', 'Excluiu medição', 'Cadastrou contrato', 'Alterou contrato'];
+function quando(iso) {
+  const d = new Date(iso), s = (Date.now() - d.getTime()) / 1000;
+  if (s < 60) return 'agora';
+  if (s < 3600) return 'há ' + Math.floor(s / 60) + ' min';
+  const hh = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  if (s < 86400 && d.getDate() === new Date().getDate()) return 'hoje ' + hh;
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' + hh;
+}
+function desenharFeed(novoId) {
+  const box = $('#feed-lista'); if (!box) return;
+  const evs = DB.log.filter((e) => EVENTOS_FEED.includes(e.acao)).slice(0, 20);
+  if (!evs.length) { box.replaceChildren(h('div', { class: 'empty', style: 'width:100%' }, 'Assim que alguém lançar uma medição, aprovar uma FR ou alterar um contrato, aparece aqui.')); return; }
+  const tipo = (a) => a === 'Aprovou FR' ? 'ok' : a === 'Lançou medição' || a === 'Cadastrou contrato' ? 'novo' : a === 'Excluiu medição' ? 'del' : 'alt';
+  box.replaceChildren(...evs.map((e) => h('div', { class: 'ev' + (e._chegou && Date.now() - e._chegou < 10000 ? ' chegou' : ''), role: 'listitem', 'data-t': tipo(e.acao), title: e.acao + ' · ' + (e.detalhe || '') + ' · ' + (e.por_nome || '') },
+    h('span', { class: 'q' }, h('i'), quando(e.em) + ' · ' + (e.por_nome || 'sistema')), h('span', { class: 'o' }, h('b', null, e.acao), e.detalhe ? ' · ' + e.detalhe : ''))));
+  if (novoId) box.scrollTo({ left: 0, behavior: 'smooth' });
+}
+setInterval(() => { if (ESTADO === 'app' && !$('#feed-lista .chegou')) desenharFeed(); }, 60000);
+function seloAoVivo() {
+  const s = $('#feed-selo'); if (s) { s.className = 'aovivo' + (AOVIVO ? '' : ' off'); s.lastChild.textContent = AOVIVO ? 'ao vivo' : 'atualiza ao abrir'; }
+  const hs = $('#hdr-sync'); if (hs) hs.textContent = AOVIVO ? '· ao vivo' : (DB.carregado_em ? '· atualizado ' + DB.carregado_em.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '· online');
+}
+function podeRedesenhar() {
+  return ESTADO === 'app' && $('#drawer').hidden && !UI.editCt && !UI.editLanc && !UI.editUser && !UI.credencial && !(document.activeElement && document.activeElement.matches('input,select,textarea'));
+}
+function agendarRedesenho() {
+  clearTimeout(tAgenda);
+  tAgenda = setTimeout(() => { calcular(); if (podeRedesenhar()) { const y = window.scrollY; render(); window.scrollTo(0, y); PEND_RENDER = false; } else PEND_RENDER = true; }, 700);
+}
+document.addEventListener('focusout', () => setTimeout(() => { if (PEND_RENDER && podeRedesenhar()) { PEND_RENDER = false; const y = window.scrollY; render(); window.scrollTo(0, y); } }, 300));
+function aplicarMudanca(tabela, p) {
+  const tipo = p.eventType, novo = p.new || {}, velho = p.old || {};
+  if (tabela === 'medicoes') {
+    if (tipo === 'DELETE') DB.medicoes = DB.medicoes.filter((m) => m.id !== velho.id);
+    else { const row = numMed(novo), i = DB.medicoes.findIndex((m) => m.id === row.id); if (i >= 0) DB.medicoes[i] = { ...DB.medicoes[i], ...row }; else DB.medicoes.push(row); }
+  } else if (tabela === 'contratos') {
+    if (tipo === 'DELETE') DB.contratos = DB.contratos.filter((c) => c.contrato !== velho.contrato);
+    else { const i = DB.contratos.findIndex((c) => c.contrato === novo.contrato); if (i >= 0) DB.contratos[i] = novo; else DB.contratos.push(novo); }
+  } else if (tabela === 'contrato_historico') { if (!DB.historico.some((x) => x.id === novo.id)) DB.historico.push(novo); }
+  else if (tabela === 'parametros') { DB.params = { ...PARAMS_PADRAO, ...novo }; }
+  else if (tabela === 'auditoria') {
+    if (DB.log.some((x) => x.id === novo.id)) return;
+    novo._chegou = Date.now(); DB.log.unshift(novo); if (DB.log.length > 300) DB.log.length = 300;
+    desenharFeed(novo.id); return;
+  }
+  agendarRedesenho();
+}
+function assinarAoVivo() {
+  if (CANAL || !SB || !SB.channel) return;
+  CANAL = SB.channel('gmc-ao-vivo');
+  for (const tb of ['medicoes', 'contratos', 'contrato_historico', 'parametros', 'auditoria'])
+    CANAL.on('postgres_changes', { event: '*', schema: 'public', table: tb }, (p) => { try { aplicarMudanca(tb, p); } catch (e) { console.error(e); } });
+  CANAL.subscribe((st) => { AOVIVO = st === 'SUBSCRIBED'; seloAoVivo(); });
+}
+async function cancelarAoVivo() { if (CANAL && SB) { try { await SB.removeChannel(CANAL); } catch (e) {} } CANAL = null; AOVIVO = false; }
+
 /* ===================== Guia lateral: lançar FR e pedido ===================== */
 const LC = { aba: 'novo', busca: '', sessao: [], fixo: {} };
 function abrirLancador(aba) {
@@ -757,7 +832,7 @@ function abrirLancador(aba) {
   $('#drawer').hidden = false; document.documentElement.style.overflow = 'hidden';
   desenharLancador();
 }
-function fecharLancador() { $('#drawer').hidden = true; document.documentElement.style.overflow = ''; }
+function fecharLancador() { $('#drawer').hidden = true; document.documentElement.style.overflow = ''; if (PEND_RENDER && podeRedesenhar()) { PEND_RENDER = false; render(); } }
 $$('#drawer [data-fechar]').forEach((b) => b.addEventListener('click', fecharLancador));
 $$('#drawer [data-aba]').forEach((b) => b.addEventListener('click', () => { LC.aba = b.dataset.aba; desenharLancador(); }));
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#drawer').hidden) fecharLancador(); });
@@ -915,7 +990,8 @@ PAGES.inicio = (main) => {
   const blocos = [
     h('div', { class: 'c7' }, sema), h('div', { class: 'c5' }, hero),
     h('div', { class: 'c8' }, card('Valor medido mês a mês', pode('relatorios') ? ['Detalhar', 'relatorios'] : null, chM, legenda())), h('div', { class: 'c4' }, alertas),
-    h('div', { class: 'c7' }, tabAcao), h('div', { class: 'c5 stack' }, card('Pendências por idade', null, chA), prox)
+    h('div', { class: 'c7' }, tabAcao), h('div', { class: 'c5 stack' }, card('Pendências por idade', null, chA), prox),
+    h('div', { class: 'c12' }, h('div', { class: 'card', id: 'card-feed' }, h('div', { class: 'cardhead' }, h('h3', null, 'Acabou de acontecer'), h('span', { class: 'aovivo' + (AOVIVO ? '' : ' off'), id: 'feed-selo' }, h('span', { class: 'pulse' }), AOVIVO ? 'ao vivo' : 'atualiza ao abrir')), h('div', { class: 'feed', id: 'feed-lista', role: 'list', 'aria-label': 'Últimas ações no sistema' })))
   ];
   main.append(h('div', { class: 'pagehead' }, h('p', null, 'Resumo do dia: prazos, verba e medições. Clique em qualquer número para abrir a lista.')), h('div', { class: 'bento' }, blocos.map((b, i) => rise(b, i))));
   requestAnimationFrame(() => {
@@ -924,6 +1000,7 @@ PAGES.inicio = (main) => {
     hbar(chA, D.aging, { label: 'faixa', value: 'valor', max: 18, vt: (r) => brlK(r.valor) + ' · ' + r.qtd, aria: 'Pendências por idade', color: (r, i) => i === 0 ? 'var(--green)' : i === 1 ? 'var(--yellow)' : 'var(--red)', tip: (r) => [h('div', null, r.faixa), tl('Valor', brl(r.valor)), tl('Linhas', n0(r.qtd))] });
     sparkline(spark, D.mensal.slice(-13, -1));
   });
+  desenharFeed();
 };
 function sparkline(el, rows) {
   el.replaceChildren();
@@ -1423,7 +1500,7 @@ function render() {
   renderTopo();
   if (PERFIL.trocar_senha) { $('#nav').replaceChildren(); $('#strip') && $('#strip').remove(); }
   if (p === 'conta') $('#pg-title').textContent = 'Minha conta';
-  $('#hdr-sync').textContent = DB.carregado_em ? '· atualizado ' + DB.carregado_em.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '· online';
+  seloAoVivo();
   const main = $('#main'); main.replaceChildren();
   if (p !== 'inicio' && p !== 'conta' && STRIP && !PERFIL.trocar_senha) main.append(STRIP);
   PAGES[p](main);
@@ -1442,7 +1519,7 @@ async function entrarComSessao(novoLogin) {
     ESTADO = 'carregando'; render();
     await carregarTudo(); calcular();
     if (novoLogin) { try { await SB.rpc('registrar_entrada'); } catch (e) {} }
-    ESTADO = 'app'; render();
+    ESTADO = 'app'; render(); assinarAoVivo();
   } catch (e) { ESTADO = 'login'; render(); $('#lg-err').textContent = msgErro(e); }
 }
 async function atualizarDados() {
@@ -1490,7 +1567,7 @@ $('#f-cadastro').addEventListener('submit', async (ev) => {
   } catch (e) { err.textContent = msgErro(e); }
   finally { $('#cd-btn').disabled = false; }
 });
-async function sair() { try { await SB.auth.signOut(); } catch (e) {} PERFIL = null; DB = { params: { ...PARAMS_PADRAO }, contratos: [], medicoes: [], historico: [], perfis: [], log: [], carregado_em: null }; ESTADO = 'login'; render(); }
+async function sair() { await cancelarAoVivo(); try { await SB.auth.signOut(); } catch (e) {} PERFIL = null; DB = { params: { ...PARAMS_PADRAO }, contratos: [], medicoes: [], historico: [], perfis: [], log: [], carregado_em: null }; ESTADO = 'login'; render(); }
 $('#b-sair').addEventListener('click', () => { fecharLancador(); sair(); });
 $('#b-pd-sair').addEventListener('click', sair);
 $('#b-pd-verificar').addEventListener('click', () => entrarComSessao(true));
