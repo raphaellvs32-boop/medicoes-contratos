@@ -88,6 +88,8 @@ svg.ic { width: 18px; height: 18px; flex: none; }
 .me .who { min-width: 0; line-height: 1.25; text-decoration: none; color: inherit; border-radius: 6px; } .me .who:hover b { color: var(--brand-ink); } .me .who b { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .me .who span { font-size: 11px; color: var(--muted); }
 .iconbtn { border: 0; background: transparent; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; cursor: pointer; color: var(--muted); }
 .iconbtn:hover { background: var(--sunken); color: var(--fg); }
+.iconbtn.sairbtn { width: auto; padding: 0 8px; gap: 4px; display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; }
+.iconbtn.sairbtn:hover { color: var(--red); background: var(--red-tint); }
 
 .content { min-width: 0; display: grid; align-content: start; }
 .topline { position: sticky; top: 0; z-index: 15; background: rgba(255,255,255,.92); backdrop-filter: saturate(1.4) blur(8px); -webkit-backdrop-filter: saturate(1.4) blur(8px); border-bottom: 1px solid var(--line); }
@@ -270,9 +272,7 @@ textarea.i { min-height: 64px; resize: vertical; }
   .side .logo .nm { display: none; }
   .nav { display: flex; overflow-x: auto; scrollbar-width: none; gap: 2px; }
   .nav .grp { display: none; } .nav a { flex: none; padding: 8px 10px; } .nav a[aria-current="page"]::before { display: none; }
-  .side { grid-template-columns: auto 1fr auto; }
-  .me { display: flex; border: 0; padding: 0; gap: 0; }
-  .me .av, .me .who { display: none; }
+  .me { display: none; }
   .topline { position: static; } .topline .in, main#main { padding-left: 16px; padding-right: 16px; }
 }
 
@@ -384,12 +384,12 @@ textarea.i { min-height: 64px; resize: vertical; }
   <aside class="side">
     <div class="logo"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17a7 7 0 0 1 14 0"/><path d="M12 17l3.5-4.5"/><path d="M12 6v1.5M6.3 9.3l1 1M17.7 9.3l-1 1"/></svg></span><div class="nm"><small>Gestão de Contratos</small><b>Medições e Contratos</b></div></div>
     <nav class="nav" id="nav" aria-label="Menu"></nav>
-    <div class="me"><span class="av" id="hdr-av">—</span><a class="who" href="#conta" title="Minha conta"><b id="hdr-nome">—</b><span id="hdr-perfil"></span></a><button class="iconbtn" type="button" id="b-sair" aria-label="Sair" title="Sair"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3M10 8l-4 4 4 4M6 12h10"/></svg></button></div>
+    <div class="me"><span class="av" id="hdr-av">—</span><a class="who" href="#conta" title="Minha conta"><b id="hdr-nome">—</b><span id="hdr-perfil"></span></a><button class="iconbtn sairbtn" type="button" id="b-sair" aria-label="Sair" title="Sair"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3M10 8l-4 4 4 4M6 12h10"/></svg><span>Sair</span></button></div>
   </aside>
   <div class="content">
     <header class="topline"><div class="in">
       <div><div class="crumb">Gestão de Contratos</div><h1 id="pg-title">Início</h1></div>
-      <div class="toolbar"><span class="status"><span class="pulse" aria-hidden="true"></span>Mês fechado <b id="hdr-mes">—</b><span class="muted" id="hdr-sync">· online</span></span><button class="btn sm" type="button" id="b-atualizar">Atualizar dados</button><button class="btn sm pri" type="button" id="b-lancar" hidden>Pedido e FR</button></div>
+      <div class="toolbar"><span class="status"><span class="pulse" aria-hidden="true"></span>Mês fechado <b id="hdr-mes">—</b><span class="muted" id="hdr-sync">· online</span></span><button class="btn sm" type="button" id="b-atualizar">Atualizar dados</button><button class="btn sm pri" type="button" id="b-lancar" hidden>Pedido e FR</button><button class="btn sm" type="button" id="b-sair-topo" title="Sair do sistema e voltar à tela de entrada"><svg class="ic" style="width:15px;height:15px;vertical-align:-3px;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3M10 8l-4 4 4 4M6 12h10"/></svg>Sair</button></div>
     </div></header>
     <main id="main"></main>
   </div>
@@ -1568,6 +1568,7 @@ $('#f-cadastro').addEventListener('submit', async (ev) => {
 });
 async function sair() { await cancelarAoVivo(); try { await SB.auth.signOut(); } catch (e) {} PERFIL = null; DB = { params: { ...PARAMS_PADRAO }, contratos: [], medicoes: [], historico: [], perfis: [], log: [], carregado_em: null }; ESTADO = 'login'; render(); }
 $('#b-sair').addEventListener('click', () => { fecharLancador(); sair(); });
+$('#b-sair-topo').addEventListener('click', () => { fecharLancador(); sair(); });
 $('#b-pd-sair').addEventListener('click', sair);
 $('#b-pd-verificar').addEventListener('click', () => entrarComSessao(true));
 
