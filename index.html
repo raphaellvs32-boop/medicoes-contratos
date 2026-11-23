@@ -760,9 +760,8 @@ function renderTopo() {
   const item = ([m, n]) => h('a', { href: '#' + m, 'aria-current': PAGINA === m ? 'page' : null }, ico(m), n, m === 'alertas' && nAlert ? h('span', { class: 'badge', title: nAlert + ' contratos vencidos ou no farol vermelho' }, String(nAlert)) : null);
   const vis = MODULOS.filter(([m]) => pode(m));
   const op = vis.filter(([m]) => ['inicio', 'medicao', 'contratos'].includes(m)), an = vis.filter(([m]) => ['alertas', 'relatorios'].includes(m)), ad = vis.filter(([m]) => m === 'config');
-  const btnL = edita('medicao') ? h('button', { class: 'navbtn', type: 'button', onclick: () => abrirLancador() }, ico('lancar'), 'Pedido e FR') : null;
   $('#b-lancar').hidden = !edita('medicao') || !!(usuarioAtual() && usuarioAtual().trocar_senha);
-  $('#nav').replaceChildren(...[h('div', { class: 'grp' }, 'Operação'), ...op.map(item), btnL, an.length ? h('div', { class: 'grp' }, 'Análise') : null, ...an.map(item), ad.length ? h('div', { class: 'grp' }, 'Administração') : null, ...ad.map(item)].filter(Boolean));
+  $('#nav').replaceChildren(...[h('div', { class: 'grp' }, 'Operação'), ...op.map(item), an.length ? h('div', { class: 'grp' }, 'Análise') : null, ...an.map(item), ad.length ? h('div', { class: 'grp' }, 'Administração') : null, ...ad.map(item)].filter(Boolean));
 }
 
 /* ===================== Acabou de acontecer + atualização ao vivo ===================== */
