@@ -459,6 +459,7 @@ async function q(p) { const { data, error } = await p; if (error) throw error; r
 function msgErro(e) {
   const m = (e && (e.message || e.error_description || e.msg)) || String(e);
   if (/Invalid login credentials/i.test(m)) return 'E-mail ou senha incorretos.';
+  if (/Could not find the function|schema cache/i.test(m)) return 'Esta função ainda não foi instalada no banco. O administrador precisa rodar o arquivo 07_atualizacao_completa.sql no SQL Editor do Supabase (uma vez) e tentar de novo.';
   if (/Email not confirmed/i.test(m)) return 'Confirme seu e-mail pelo link enviado pelo sistema antes de entrar.';
   if (/already registered|already been registered/i.test(m)) return 'Este e-mail já tem conta. Use Entrar.';
   if (/row-level security|permission denied|PGRST116|0 rows|multiple \(or no\) rows/i.test(m)) return 'Seu perfil não tem permissão para esta ação.';
